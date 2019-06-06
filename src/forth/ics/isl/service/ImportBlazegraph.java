@@ -40,6 +40,7 @@ public class ImportBlazegraph {
                                        @QueryParam("namespace") String namespace,
                                        @DefaultValue("") @QueryParam("graph") String graph) throws MalformedURLException, IOException {
 
+
         BlazegraphManager manager = new BlazegraphManager();
 
         if(serviceURL == null)
@@ -58,8 +59,8 @@ public class ImportBlazegraph {
         
         if(!dataURL.startsWith("http://"))
             dataURL = "http://" + dataURL;
-
-        file = new URL(dataURL).openStream();
+        if(file != null)
+            file = new URL(dataURL).openStream();
                
         System.out.println("FileNew: " + file);
         System.out.println("dataURLNew:" + dataURL);
@@ -70,5 +71,6 @@ public class ImportBlazegraph {
 
         return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
     }
+    
     
 }
