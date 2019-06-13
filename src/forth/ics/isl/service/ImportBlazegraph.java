@@ -69,7 +69,9 @@ public class ImportBlazegraph {
 
         manager.closeConnectionToBlazeGraph();
 
-        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
+        // Adding Access-Control-Allow-Origin to the header in order to resolve the CORS issue between modern browsers and server
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "X-Requested-With").build();
+        
     }
     
     
