@@ -17,6 +17,8 @@ import javax.ws.rs.POST;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import java.net.URL;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 
 
 /**
@@ -73,6 +75,16 @@ public class ImportBlazegraph {
         return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "X-Requested-With").build();
         
     }
+    
+    
+    @GET
+    @Path("/helloWorld")
+    public Response getHelloWorld() {
+        return Response.status(200).entity("Hello World page!!").header("Access-Control-Allow-Origin", "X-Requested-With").build();
+    }
+    
+    
+    
     
     
 }
