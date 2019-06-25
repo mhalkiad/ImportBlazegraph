@@ -13,7 +13,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import forth.ics.isl.blazegraph.*;
-import forth.ics.isl.utils.PropertiesManager;
+//import forth.ics.isl.utils.PropertiesManager;
 import forth.ics.isl.utils.ResponseStatus;
 
 
@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.rio.*;
 @Path("/import")
 public class ImportBlazegraph {
     
-    private PropertiesManager propertiesManager = PropertiesManager.getPropertiesManager();
+   // private PropertiesManager propertiesManager = PropertiesManager.getPropertiesManager();
     
     
     @POST
@@ -46,11 +46,11 @@ public class ImportBlazegraph {
 
         BlazegraphManager manager = new BlazegraphManager();
 
-        if(serviceURL == null)
-            serviceURL = propertiesManager.getTripleStoreUrl();
+//        if(serviceURL == null)
+//            serviceURL = propertiesManager.getTripleStoreUrl();
         
-        if(namespace == null)
-            namespace = propertiesManager.getTripleStoreNamespace();
+//        if(namespace == null)
+//            namespace = propertiesManager.getTripleStoreNamespace();
               
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
