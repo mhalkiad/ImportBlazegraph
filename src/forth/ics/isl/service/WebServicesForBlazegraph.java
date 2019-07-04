@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.rio.*;
  */
 
 @Path("/import")
-public class WebServiceForBlazegraph {
+public class WebServicesForBlazegraph {
     
     private PropertiesManager propertiesManager = PropertiesManager.getPropertiesManager();
         
