@@ -13,8 +13,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import forth.ics.isl.blazegraph.*;
-//import forth.ics.isl.utils.PropertiesManager;
+import forth.ics.isl.utils.PropertiesManager;
 import forth.ics.isl.utils.ResponseStatus;
+import java.io.File;
 
 
 
@@ -30,13 +31,11 @@ import org.eclipse.rdf4j.rio.*;
 @Path("/import")
 public class ImportBlazegraph {
     
-   // private PropertiesManager propertiesManager = PropertiesManager.getPropertiesManager();
-    
-    
+    private PropertiesManager propertiesManager = PropertiesManager.getPropertiesManager();
+        
     @POST
     @Path("/import")
-    //@Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "text/rdf+n3"})
-    public void importToBlazegraph(InputStream file, 
+    public Response importToBlazegraph(InputStream file, 
                                        @QueryParam("data-url") String dataURL,
                                        @QueryParam("service-url") String serviceURL,
                                        @QueryParam("content-type") String contentType,
@@ -46,32 +45,25 @@ public class ImportBlazegraph {
 
         BlazegraphManager manager = new BlazegraphManager();
 
-//        if(serviceURL == null)
-//            serviceURL = propertiesManager.getTripleStoreUrl();
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
         
-//        if(namespace == null)
-//            namespace = propertiesManager.getTripleStoreNamespace();
+        if(namespace == null)
+            namespace = propertiesManager.getTripleStoreNamespace();
               
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
         RDFFormat format = Rio.getParserFormatForMIMEType(contentType).get();
         
-        
-        if(!dataURL.startsWith("http://"))
-            dataURL = "http://" + dataURL;
-        if(file != null)
-            file = new URL(dataURL).openStream();
-                 
         ResponseStatus responseStatus = manager.importFile(file, format, graph);
 
         manager.closeConnectionToBlazeGraph();
 
-        // Adding Access-Control-Allow-Origin to the header in order to resolve the CORS issue between modern browsers and server
-        //return Response.status(200).entity("ΟΚ").header("Access-Control-Allow-Origin", "*").build();
-        //return Response.status(200).header("Access-Control-Allow-Origin", "*").build();
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "*").build();
     }
     
     
+    // Testing web service
     @GET
     @Path("/helloWorld")
     public Response getHelloWorld() {
@@ -80,6 +72,70 @@ public class ImportBlazegraph {
     
     
     
+    @GET
+    @Path("/query")
+    public Response query(@QueryParam("queryString") String queryString,
+                          @QueryParam("service-url") String serviceURL,
+                          @HeaderParam("Content-Type") String contentType,
+                          @QueryParam("namespace") String namespace,
+                          @DefaultValue("0") @QueryParam("timeout") int timeout) {
+        
+        BlazegraphManager manager = new BlazegraphManager();
+        
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
+        
+        if(namespace == null)
+            namespace = propertiesManager.getTripleStoreNamespace();
+      
+        manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
+        
+        ResponseStatus responseStatus = manager.query(queryString, contentType, timeout);
+        
+        manager.closeConnectionToBlazeGraph();
+        
+        // Adding Access-Control-Allow-Origin to the header in order to resolve the CORS issue between modern browsers and server
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "*").build();
+    }
     
+    
+    
+    @GET
+    @Path("/export")
+    public Response export(@QueryParam("filename") String filename, 
+                                       @QueryParam("service-url") String serviceURL,
+                                       @HeaderParam("Accept") String format,
+                                       @QueryParam("namespace") String namespace,
+                                       @DefaultValue("") @QueryParam("graph") String graph) 
+    {
+        
+        System.out.println("filename: " + filename + " namespace:" + namespace + " graph:" 
+                            + graph + " service-url:" + serviceURL + " accept:" + format);
+        BlazegraphManager manager = new BlazegraphManager();
+
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
+        
+        if(namespace == null)
+            namespace = propertiesManager.getTripleStoreNamespace();
+      
+        manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
+        
+        RDFFormat rdfFormat = Rio.getParserFormatForMIMEType(format).get();
+         
+        ResponseStatus responseStatus = manager.exportFile(filename, namespace, graph, rdfFormat);
+    
+        manager.closeConnectionToBlazeGraph();
+        
+        if(responseStatus.getStatus() == 200) {
+            String filepath = "/opt/tomcat/apache-tomcat-8.0.53/bin/" + responseStatus.getResponse();
+            File file = new File(filepath);
+            Response.ResponseBuilder response = Response.ok((Object) file);
+            response.header("Content-Disposition","attachment; filename=" + responseStatus.getResponse());
+            return response.build();
+        }
+        
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "*").build();
+    }  	
     
 }

@@ -7,12 +7,17 @@ package forth.ics.isl.blazegraph;
 
 import forth.ics.isl.utils.ResponseStatus;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.QueryLanguage;
 
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -27,6 +32,8 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
 
 
 
@@ -110,6 +117,66 @@ public class BlazegraphManager {
         }
         }     
         return responseStatus;
+    }
+    
+    
+    public ResponseStatus query(String queryString, String dataFormat, int timeout) {
+        
+        TupleQuery tupleQuery;
+        String response;
+        ResponseStatus responseStatus;
+        
+        try (RepositoryConnection conn = repo.getConnection()) {
+   
+            tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+            tupleQuery.setMaxExecutionTime(timeout);
+            //System.out.println("forth.ics.isl.blazegraph.BlazegraphManager.query():"+ tupleQuery);
+            ByteArrayOutputStream out = outputStreamData(tupleQuery, dataFormat);
+            if(out == null) {
+                responseStatus = new ResponseStatus(415, "Unsupported Media Type");
+                return responseStatus;
+            }
+            
+            byte[] resp = out.toByteArray();
+            response = new String(resp);
+        }
+        
+        if(response.equals(""))
+            responseStatus = new ResponseStatus(204, "No Content returned");
+        else
+            responseStatus = new ResponseStatus(200, response);
+        
+        return responseStatus;
+    }
+    
+    
+    
+     public ResponseStatus exportFile(String filename, String namespace, String graph, RDFFormat dataFormat) {
+        
+        ResponseStatus responseStatus;
+        
+        String fullFilename = filename +"."+ dataFormat.getDefaultFileExtension();
+         
+        try (RepositoryConnection con = repo.getConnection()) {
+            
+            con.begin();
+            
+            RDFWriter writer = Rio.createWriter(dataFormat, new OutputStreamWriter(new FileOutputStream(new File(fullFilename))));
+         
+            if(!graph.isEmpty()) {
+                
+                ValueFactory factory = SimpleValueFactory.getInstance();
+                IRI graphIRI = factory.createIRI(graph);
+           
+                con.export(writer, graphIRI);
+            }
+            else
+                con.export(writer);
+   
+        } catch (FileNotFoundException ex) {
+            responseStatus = new ResponseStatus(400, "File not found");
+        }
+        return new ResponseStatus(200, fullFilename);
     }
    
 }
