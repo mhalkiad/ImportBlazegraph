@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.rio.*;
  */
 
 @Path("/import")
-public class ImportBlazegraph {
+public class WebServiceForBlazegraph {
     
     private PropertiesManager propertiesManager = PropertiesManager.getPropertiesManager();
         
@@ -103,14 +103,12 @@ public class ImportBlazegraph {
     @GET
     @Path("/export")
     public Response export(@QueryParam("filename") String filename, 
-                                       @QueryParam("service-url") String serviceURL,
-                                       @HeaderParam("Accept") String format,
-                                       @QueryParam("namespace") String namespace,
-                                       @DefaultValue("") @QueryParam("graph") String graph) 
+                           @QueryParam("service-url") String serviceURL,
+                           @HeaderParam("Accept") String format,
+                           @QueryParam("namespace") String namespace,
+                           @DefaultValue("") @QueryParam("graph") String graph) 
     {
         
-        System.out.println("filename: " + filename + " namespace:" + namespace + " graph:" 
-                            + graph + " service-url:" + serviceURL + " accept:" + format);
         BlazegraphManager manager = new BlazegraphManager();
 
         if(serviceURL == null)
