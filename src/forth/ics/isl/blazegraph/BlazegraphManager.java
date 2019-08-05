@@ -18,10 +18,9 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.QueryLanguage;
-
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.query.TupleQuery;
-
+import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
 import org.eclipse.rdf4j.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
@@ -50,20 +49,16 @@ public class BlazegraphManager {
     public void openConnectionToBlazegraph(String sparqlEndPoint) {
         
         repo = new SPARQLRepository(sparqlEndPoint);
-        repo.initialize();
-        
+        repo.initialize();    
     }
     
     
     public void closeConnectionToBlazeGraph() {
         
         repo.getConnection().close();
-
     }
     
-    
-    
-    
+  
     private ByteArrayOutputStream outputStreamData(TupleQuery tupleQuery, String dataFormat)
     {
         ByteArrayOutputStream out = null;
@@ -130,7 +125,7 @@ public class BlazegraphManager {
    
             tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
             tupleQuery.setMaxExecutionTime(timeout);
-            //System.out.println("forth.ics.isl.blazegraph.BlazegraphManager.query():"+ tupleQuery);
+           
             ByteArrayOutputStream out = outputStreamData(tupleQuery, dataFormat);
             if(out == null) {
                 responseStatus = new ResponseStatus(415, "Unsupported Media Type");
@@ -177,6 +172,13 @@ public class BlazegraphManager {
             responseStatus = new ResponseStatus(400, "File not found");
         }
         return new ResponseStatus(200, fullFilename);
+    }
+     
+    
+    public void updateQuery(String queryString)
+    {
+        Update update = repo.getConnection().prepareUpdate(QueryLanguage.SPARQL, queryString);
+        update.execute();
     }
    
 }

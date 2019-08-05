@@ -5,20 +5,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
-import java.net.URL;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-
 import forth.ics.isl.blazegraph.*;
 import forth.ics.isl.utils.PropertiesManager;
 import forth.ics.isl.utils.ResponseStatus;
 import java.io.File;
-
-
-
 import org.eclipse.rdf4j.rio.*;
 
 
@@ -135,5 +130,31 @@ public class WebServicesForBlazegraph {
         
         return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "*").build();
     }  	
+    
+    
+    @POST
+    @Path("/update")
+    public Response update(@QueryParam("update") String updateMsg,
+                           @QueryParam("namespace") String namespace,
+                           @QueryParam("service-url") String serviceURL) {
+        
+        BlazegraphManager manager = new BlazegraphManager();
+
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
+        
+        if(namespace == null)
+            namespace = propertiesManager.getTripleStoreNamespace();
+      
+        manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
+     
+        manager.updateQuery(updateMsg);
+
+        manager.closeConnectionToBlazeGraph();
+        
+        return Response.status(200).entity("Successfully updated").header("Access-Control-Allow-Origin", "*").build();
+        //return Response.status(200).entity("Updated!!").build();
+    }
+     	
     
 }
