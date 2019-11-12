@@ -12,8 +12,8 @@ package forth.ics.isl.utils;
 
 import java.io.*;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 
 
 public class PropertiesManager {
@@ -33,7 +33,7 @@ public class PropertiesManager {
                 }
                 propManager = new PropertiesManager();
             } catch (IOException ex) {
-                Logger.getLogger(PropertiesManager.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(PropertiesManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return propManager;

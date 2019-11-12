@@ -91,6 +91,7 @@ public class BlazegraphManager {
       
         ResponseStatus responseStatus = null;
         
+        
         try (RepositoryConnection con = repo.getConnection()) {
 
         con.begin();
@@ -104,7 +105,7 @@ public class BlazegraphManager {
             responseStatus = new ResponseStatus(200, "File imported successfully");
         } catch (RepositoryException e) {
             responseStatus = new ResponseStatus(404, "Unable to connect to repository");
-            con.rollback();
+            //con.rollback();
         } catch (IOException ex) {
             responseStatus = new ResponseStatus(400, "Bad request");
         } catch (RDFParseException ex) {

@@ -37,15 +37,15 @@ public class WebServicesForBlazegraph {
                                        @QueryParam("namespace") String namespace,
                                        @DefaultValue("") @QueryParam("graph") String graph) throws MalformedURLException, IOException {
 
-
+        
         BlazegraphManager manager = new BlazegraphManager();
 
-        if(serviceURL == null)
+        if(serviceURL == null) {
             serviceURL = propertiesManager.getTripleStoreUrl();
-        
-        if(namespace == null)
+        }
+        if(namespace == null) {
             namespace = propertiesManager.getTripleStoreNamespace();
-              
+        }      
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
         RDFFormat format = Rio.getParserFormatForMIMEType(contentType).get();
